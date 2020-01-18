@@ -2,19 +2,19 @@ package com.swang.jpaweb.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.swang.jpaweb.client.WeatherClient;
+import com.swang.jpaweb.dto.JoggingEntry;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
 
 // when used as DTO, allow listed properties as output only, not as input
 @JsonIgnoreProperties(value = {"id", "user", "date", "weather"}, allowGetters = true)
-@Data @NoArgsConstructor
+@Data
 @Entity
 public class Entry {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
@@ -28,9 +28,13 @@ public class Entry {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Entry(int duration, int distance, String location) {
-        this.duration = duration;
-        this.distance = distance;
-        this.location = location;
+    public void copyIfNotNUll(final JoggingEntry dto) {
+        if (dto.getDate() != null) setDate(dto.getDate());
+        if (dto.getLocation() != null) setLocation(dto.getLocation());
+        if (dto.getDuration() > 0) setDuration(dto.getDuration());
+        if (dto.getDistance() > 0) setDistance(dto.getDistance());
+        if (dto.getDate() != null || dto.getLocation() != null) { //reset weather
+            setWeather(WeatherClient.getWeather(dto.getLocation(), dto.getDate()));
+        }
     }
 }
