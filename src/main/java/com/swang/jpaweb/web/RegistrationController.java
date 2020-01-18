@@ -1,31 +1,37 @@
 package com.swang.jpaweb.web;
 
-import com.swang.jpaweb.model.User;
+import com.swang.jpaweb.dto.User;
 import com.swang.jpaweb.service.UserService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-@Slf4j
 @RestController
 @RequestMapping("/registration")
 public class RegistrationController {
-    private final UserService userService;
+    private final UserService service;
 
     public RegistrationController(UserService userService) {
-        this.userService = userService;
+        this.service = userService;
     }
 
     @GetMapping
-    public Iterable<com.swang.jpaweb.dto.User> findAll() {
-        return userService.findAll();
+    public Iterable<User> findAll() {
+        return service.findAll();
     }
 
     @PostMapping
-    public void createNewUser(@Valid @RequestBody User user) {
-        log.info("create user for " + user.toString());
-        log.info("create user Password for " + user.getPassword());
-        userService.saveUser(user);
+    public User createNewUser(@Valid @RequestBody User user) {
+        return User.valueOf(service.saveUser(user));
+    }
+
+    @PutMapping("/{user}")
+    public User updateUser(@PathVariable String user, @Valid @RequestBody User dto) {
+        return User.valueOf(service.update(user, dto));
+    }
+
+    @DeleteMapping("/{username}")
+    public void delete(@PathVariable String username) {
+        service.delete(username);
     }
 }

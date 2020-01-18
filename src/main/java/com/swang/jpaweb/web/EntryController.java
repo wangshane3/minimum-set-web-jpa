@@ -1,16 +1,16 @@
 package com.swang.jpaweb.web;
 
+import com.swang.jpaweb.dto.JoggingAverage;
 import com.swang.jpaweb.dto.JoggingEntry;
 import com.swang.jpaweb.service.EntryService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/jogging")
 public class EntryController {
@@ -22,36 +22,48 @@ public class EntryController {
 
     @GetMapping
     public Iterable<JoggingEntry> findAll() {
-        String username = getUsername();
-        if (username == null)  return Collections.emptyList();
-        return service.findByUser(username);
+        return service.findAll();
     }
 
     @GetMapping("/{id}")
     public JoggingEntry findOne(@PathVariable int id) {
-        String username = getUsername();
-        if (username == null) return null;
-        return service.findByUserAndId(username, id);
+        return service.findById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public JoggingEntry create(@RequestBody JoggingEntry dto) {
-        String username = getUsername();
-        if (username == null) return null;
-        return service.save(username, dto);
+        return service.save(dto);
     }
 
-    // another way to get logged-in user name is in LoginController: ask Spring to inject Principal
-    private String getUsername() {
-        String username;
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails)principal).getUsername();
-        } else {
-            username = principal.toString();
-        }
-        log.info("user login is " + username);
-        return username;
+    @PutMapping("/{id}")
+    public JoggingEntry update(@PathVariable int id, @RequestBody JoggingEntry dto) {
+        return service.update(id, dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable int id) {
+        service.delete(id);
+    }
+
+    @GetMapping("/report")
+    public Iterable<JoggingAverage> report() {
+        List<JoggingEntry> entries = service.findAll();
+        if (entries == null || entries.isEmpty()) return Collections.emptyList();
+        Optional<Date> firstDay = entries.stream().map(JoggingEntry::getDate).min(Date::compareTo);
+        if (!firstDay.isPresent()) return Collections.emptyList();
+        final Instant dayOne = firstDay.get().toInstant();
+        Map<Integer, List<JoggingEntry>> map = entries.stream().collect(Collectors.groupingBy(e ->
+                (int) (ChronoUnit.DAYS.between(dayOne, e.getDate().toInstant()) / 7)));
+        return map.entrySet().stream().map(e -> {
+            JoggingAverage avg = new JoggingAverage();
+            avg.setWeek(e.getKey() + 1); // not 0-based, but first week is week 1
+            int daysWorked = (int) e.getValue().stream().count();
+            int totalFeet = e.getValue().stream().mapToInt(JoggingEntry::getDistance).sum();
+            int totalMinutes = e.getValue().stream().mapToInt(JoggingEntry::getDuration).sum();
+            avg.setSpeed(totalFeet / totalMinutes);
+            avg.setDailyDistance(totalFeet / daysWorked);
+            return avg;
+        }).collect(Collectors.toList());
     }
 }

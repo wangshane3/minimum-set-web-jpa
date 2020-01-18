@@ -18,4 +18,9 @@ public class Role {
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "roles")
     private Collection<User> users;
+
+    @Override
+    public String toString() { // avoid recursion
+        return "Role{role=" + role + '}';
+    }
 }

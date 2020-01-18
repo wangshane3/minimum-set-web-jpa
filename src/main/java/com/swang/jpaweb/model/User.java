@@ -1,12 +1,15 @@
 package com.swang.jpaweb.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import java.util.Collection;
 
+@JsonIgnoreProperties({"id", "roles", "entries"}) // when used as DTO
+@NoArgsConstructor
 @Data
 @Entity
 public class User {
@@ -38,4 +41,12 @@ public class User {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, mappedBy = "user")
     private Collection<Entry> entries;
+
+    public User(String username, String password, String firstName, String lastName, String email) {
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+    }
 }

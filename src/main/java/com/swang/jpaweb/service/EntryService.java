@@ -9,6 +9,8 @@ import com.swang.jpaweb.repo.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -31,23 +33,29 @@ public class EntryService {
         entryRepository = eRepo;
     }
 
-    public List<JoggingEntry> findByUser(final String username) {
+    public List<JoggingEntry> findAll() {
+        final String username = getUsername();
+        if (username == null)  return Collections.emptyList();
         Optional<User> user = userRepository.findByUsername(username);
         if (!user.isPresent()) return Collections.emptyList();
-        return user.get().getEntries().stream().map(EntryService::toDto)
+        return user.get().getEntries().stream().map(JoggingEntry::valueOf)
                 .collect(Collectors.toList());
     }
 
-    public JoggingEntry findByUserAndId(final String username, int id) {
+    public JoggingEntry findById(int id) {
+        final String username = getUsername();
+        if (username == null)  return null;
         Optional<User> user = userRepository.findByUsername(username);
         if (!user.isPresent()) return null;
         return user.get().getEntries().stream().filter(dao -> dao.getId() == id)
-                .map(EntryService::toDto).findFirst().orElse(null);
+                .map(JoggingEntry::valueOf).findFirst().orElse(null);
     }
 
-    public JoggingEntry save(final String username, final JoggingEntry dto) {
+    public JoggingEntry save(final JoggingEntry dto) {
+        final String username = getUsername();
+        if (username == null || dto == null)  return null;
         Optional<User> user = userRepository.findByUsername(username);
-        if (!user.isPresent() || dto == null) return null;
+        if (!user.isPresent()) return null; // user must register and login
         if (dto.getDate() == null) { // default date to today
             dto.setDate(Calendar.getInstance().getTime());
         }
@@ -60,9 +68,43 @@ public class EntryService {
         return dto;
     }
 
-    private static JoggingEntry toDto(Entry dao) { // or use ModelMapper
-        JoggingEntry entry = new JoggingEntry();
-        BeanUtils.copyProperties(dao, entry);
-        return entry;
+    public void delete(int id) {
+        entryRepository.deleteById(id);
+    }
+
+    public JoggingEntry update(int id, JoggingEntry dto) {
+        final String username = getUsername();
+        if (username == null || dto == null)  return null;
+        Optional<User> user = userRepository.findByUsername(username);
+        if (!user.isPresent()) return null; // user must register and login
+        Optional<Entry> entry = entryRepository.findById(id);
+        if (!entry.isPresent()) return null; // do nothing if record does not exist in DB
+        Entry found = entry.get();
+        if (!found.getUser().equals(user.get())) return null; // disallow change other's record
+        if (dto.getDate() != null) { // update only if changing
+            found.setDate(dto.getDate());
+        }
+        if (dto.getLocation() != null) { // update only if changing
+            found.setLocation(dto.getLocation());
+        }
+        if (dto.getDistance() > 0) { // update only if changing
+            found.setDistance(dto.getDistance());
+        }
+        if (dto.getDistance() > 0) { // update only if changing
+            found.setDistance(dto.getDistance());
+        }
+        return dto;
+    }
+
+    // another way to get logged-in user name is let Spring inject Principal
+    private String getUsername() {
+        String username;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails)principal).getUsername();
+        } else {
+            username = principal.toString();
+        }
+        return username;
     }
 }
