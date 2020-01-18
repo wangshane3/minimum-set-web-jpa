@@ -81,19 +81,8 @@ public class EntryService {
         if (!entry.isPresent()) return null; // do nothing if record does not exist in DB
         Entry found = entry.get();
         if (!found.getUser().equals(user.get())) return null; // disallow change other's record
-        if (dto.getDate() != null) { // update only if changing
-            found.setDate(dto.getDate());
-        }
-        if (dto.getLocation() != null) { // update only if changing
-            found.setLocation(dto.getLocation());
-        }
-        if (dto.getDistance() > 0) { // update only if changing
-            found.setDistance(dto.getDistance());
-        }
-        if (dto.getDistance() > 0) { // update only if changing
-            found.setDistance(dto.getDistance());
-        }
-        return dto;
+        found.copyIfNotNUll(dto);  // use properties in dto if set/changing
+        return dto; // when a DAO, found is changed, JPA updates DB automatically
     }
 
     // another way to get logged-in user name is let Spring inject Principal

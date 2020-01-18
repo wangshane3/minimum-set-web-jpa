@@ -1,20 +1,19 @@
 package com.swang.jpaweb.web;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
+import com.swang.jpaweb.client.GithubClient;
+import com.swang.jpaweb.dto.DashboardEntry;
+import com.swang.jpaweb.dto.RepositoryEvent;
+import com.swang.jpaweb.model.GithubProject;
+import com.swang.jpaweb.repo.GithubProjectRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.swang.jpaweb.dto.DashboardEntry;
-import com.swang.jpaweb.dto.RepositoryEvent;
-import com.swang.jpaweb.client.GithubClient;
-import com.swang.jpaweb.model.GithubProject;
-import com.swang.jpaweb.repo.GithubProjectRepository;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @RestController
 public class EventsController {

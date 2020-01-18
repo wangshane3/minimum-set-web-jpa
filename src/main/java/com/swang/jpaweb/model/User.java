@@ -2,19 +2,17 @@ package com.swang.jpaweb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 import java.util.Collection;
 
 @JsonIgnoreProperties({"id", "roles", "entries"}) // when used as DTO
-@NoArgsConstructor
 @Data
 @Entity
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private int id;
 
@@ -30,9 +28,7 @@ public class User {
     private String username;
 
     private String firstName;
-
     private String lastName;
-
     private int active;
 
     @ManyToMany(cascade = CascadeType.ALL)
@@ -42,11 +38,12 @@ public class User {
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, mappedBy = "user")
     private Collection<Entry> entries;
 
-    public User(String username, String password, String firstName, String lastName, String email) {
-        this.username = username;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
+    public void copyIfNotNUll(final com.swang.jpaweb.dto.User dto, PasswordEncoder encoder) {
+        // Encode plaintext password if changing
+        if (dto.getPassword() != null) setPassword(encoder.encode(dto.getPassword()));
+        if (dto.getFirstName() != null) setFirstName(dto.getFirstName());
+        if (dto.getLastName() != null) setLastName(dto.getLastName());
+        if (dto.getUsername() != null) setUsername(dto.getUsername());
+        if (dto.getEmail() != null) setEmail(dto.getEmail());
     }
 }

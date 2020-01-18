@@ -1,11 +1,9 @@
 package com.swang.jpaweb;
 
-import java.util.Arrays;
-import java.util.List;
-
+import com.swang.jpaweb.client.GithubClient;
+import com.swang.jpaweb.dto.RepositoryEvent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
@@ -18,8 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 
-import com.swang.jpaweb.dto.RepositoryEvent;
-import com.swang.jpaweb.client.GithubClient;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;

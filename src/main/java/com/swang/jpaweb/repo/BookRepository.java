@@ -1,10 +1,9 @@
 package com.swang.jpaweb.repo;
 
-import java.util.List;
-
+import com.swang.jpaweb.model.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.swang.jpaweb.model.Book;
+import java.util.List;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> findByTitle(String title);

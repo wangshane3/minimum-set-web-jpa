@@ -50,18 +50,21 @@ public class EntryController {
     public Iterable<JoggingAverage> report() {
         List<JoggingEntry> entries = service.findAll();
         if (entries == null || entries.isEmpty()) return Collections.emptyList();
+
         Optional<Date> firstDay = entries.stream().map(JoggingEntry::getDate).min(Date::compareTo);
         if (!firstDay.isPresent()) return Collections.emptyList();
+
         final Instant dayOne = firstDay.get().toInstant();
-        Map<Integer, List<JoggingEntry>> map = entries.stream().collect(Collectors.groupingBy(e ->
-                (int) (ChronoUnit.DAYS.between(dayOne, e.getDate().toInstant()) / 7)));
-        return map.entrySet().stream().map(e -> {
+        Map<Integer, List<JoggingEntry>> runsByWeek = entries.stream().collect(Collectors
+            .groupingBy(e -> (int) (ChronoUnit.DAYS.between(dayOne, e.getDate().toInstant()) / 7)));
+
+        return runsByWeek.entrySet().stream().map(e -> {
             JoggingAverage avg = new JoggingAverage();
             avg.setWeek(e.getKey() + 1); // not 0-based, but first week is week 1
-            int daysWorked = (int) e.getValue().stream().count();
             int totalFeet = e.getValue().stream().mapToInt(JoggingEntry::getDistance).sum();
             int totalMinutes = e.getValue().stream().mapToInt(JoggingEntry::getDuration).sum();
             avg.setSpeed(totalFeet / totalMinutes);
+            int daysWorked = (int) e.getValue().stream().count();
             avg.setDailyDistance(totalFeet / daysWorked);
             return avg;
         }).collect(Collectors.toList());

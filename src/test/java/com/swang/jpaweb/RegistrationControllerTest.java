@@ -1,6 +1,6 @@
 package com.swang.jpaweb;
 
-import com.swang.jpaweb.model.User;
+import com.swang.jpaweb.dto.User;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,8 +49,9 @@ class RegistrationControllerTest {
 
     @Test
     void create() throws JSONException {
-        final User user = new User("johnSmith", "password",
-                "john", "smith", "johnsmith@gmail.com");
+        final User user = new User("johnsmith@gmail.com", "johnSmith", "password",
+                "john", "smith", new String[]{"ignored"});
+        logger.info("what User is as input " + user);
         final ResponseEntity<String> response = restTemplate.exchange(
                 createURL("/registration"), HttpMethod.POST,
                 new HttpEntity<User>(user, headers), String.class);

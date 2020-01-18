@@ -21,11 +21,10 @@ import java.util.stream.Collectors;
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 @Transactional
 public class UserService {
+    private static final String USER_ROLE = "ROLE_USER";
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-
-    private static final String USER_ROLE = "ROLE_USER";
 
     public UserService(UserRepository userRepo, RoleRepository roleRepo, PasswordEncoder encoder) {
         userRepository = userRepo;
@@ -34,15 +33,15 @@ public class UserService {
     }
 
     public User saveUser(final com.swang.jpaweb.dto.User user) {
+        log.info("what User is as input " + user);
         User dao = new User();
         BeanUtils.copyProperties(user, dao, null, "password", "active", "roles");
-        log.debug("what is as input " + user);
         // Encode plaintext password
         dao.setPassword(passwordEncoder.encode(user.getPassword()));
         dao.setActive(1);
         // Set Role to ROLE_USER
         dao.setRoles(Collections.singletonList(roleRepository.findByRole(USER_ROLE)));
-        log.debug("what goes to DB " + user);
+        log.info("what User goes to DB " + dao);
         return userRepository.saveAndFlush(dao);
     }
 
@@ -70,24 +69,9 @@ public class UserService {
                 return null; // do nothing if the user does not exist in system
             }
         }
-        log.info("what is in DB " + found);
-        if (dto.getPassword() != null) { // Encode plaintext password if changing
-            found.setPassword(passwordEncoder.encode(dto.getPassword()));
-        }
-        if (dto.getFirstName() != null) { // update only if changing
-            found.setFirstName(dto.getFirstName());
-        }
-        if (dto.getLastName() != null) { // update only if changing
-            found.setLastName(dto.getLastName());
-        }
-        if (dto.getUsername() != null) { // update only if changing
-            found.setUsername(dto.getUsername());
-        }
-        if (dto.getEmail() != null) { // update only if changing
-            found.setEmail(dto.getEmail());
-        }
-        log.info("what goes to DB " + found);
-        // userRepository.save(found); UPDATE is automatic
-        return found;
+        log.info("what User is in DB " + found);
+        found.copyIfNotNUll(dto, passwordEncoder);  // use properties in dto if set/changing
+        log.info("what User goes to DB " + found);
+        return found; // when a DAO, found is changed, JPA updates DB automatically
     }
 }

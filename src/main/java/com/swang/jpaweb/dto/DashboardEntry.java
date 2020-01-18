@@ -1,10 +1,9 @@
 package com.swang.jpaweb.dto;
 
-import java.util.List;
-
 import com.swang.jpaweb.model.GithubProject;
-
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 public class DashboardEntry { // DTO

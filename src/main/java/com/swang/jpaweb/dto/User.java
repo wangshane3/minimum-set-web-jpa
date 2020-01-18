@@ -1,12 +1,12 @@
 package com.swang.jpaweb.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.swang.jpaweb.model.Role;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
-@Data
-@JsonIgnoreProperties(value = {"password"}, allowSetters = true) // allow as input, not as output
+@Data @AllArgsConstructor @NoArgsConstructor
 public class User {
     private String email;
     private String username;

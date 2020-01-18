@@ -1,11 +1,10 @@
 package com.swang.jpaweb.dto;
 
-import java.time.OffsetDateTime;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Getter;
+
+import java.time.OffsetDateTime;
 
 @Getter
 public class RepositoryEvent {

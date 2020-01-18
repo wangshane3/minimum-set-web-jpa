@@ -1,10 +1,7 @@
 package com.swang.jpaweb.client;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-
+import com.swang.jpaweb.config.GithubProperties;
+import com.swang.jpaweb.dto.RepositoryEvent;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
@@ -18,8 +15,10 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import com.swang.jpaweb.config.GithubProperties;
-import com.swang.jpaweb.dto.RepositoryEvent;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class GithubClient {

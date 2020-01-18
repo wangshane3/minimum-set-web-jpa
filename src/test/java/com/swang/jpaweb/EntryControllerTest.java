@@ -3,6 +3,7 @@ package com.swang.jpaweb;
 import com.swang.jpaweb.dto.JoggingEntry;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -37,7 +38,7 @@ class EntryControllerTest {
         headers = new HttpHeaders();
     }
 
-    @Test
+    @Test @Order(1)
     void findAll() {
         final ResponseEntity<String> response = restTemplate.exchange(
                 createURL("/api/jogging"), HttpMethod.GET,
@@ -47,7 +48,7 @@ class EntryControllerTest {
         assertTrue(response.getBody().contains("date"));
     }
 
-    @Test
+    @Test @Order(2)
     void findOne() throws JSONException {
         final ResponseEntity<String> response = restTemplate.exchange(
                 createURL("/api/jogging/2"), HttpMethod.GET,
@@ -59,7 +60,7 @@ class EntryControllerTest {
         JSONAssert.assertEquals(expected, response.getBody(), false);
     }
 
-    @Test
+    @Test @Order(3)
     void report() throws JSONException {
         final ResponseEntity<String> response = restTemplate.exchange(
                 createURL("/api/jogging/report"), HttpMethod.GET,
@@ -67,11 +68,11 @@ class EntryControllerTest {
         logger.info("get report endpoint returned " + response.getBody());
         assertNotNull(response, "Response must be published JSON");
         assertTrue(response.getBody().contains("speed"));
-        final String expected = "[{week:1,speed:21,dailyDistance:12342}]";
+        final String expected = "[{week:1,speed:21,dailyDistance:12342},{week:2,speed:468,dailyDistance:13579}]";
         JSONAssert.assertEquals(expected, response.getBody(), false);
     }
 
-    @Test
+    @Test @Order(4)
     void create() throws JSONException {
         JoggingEntry entry = new JoggingEntry(29, 13579, "London,uk");
         final ResponseEntity<String> response = restTemplate.exchange(
@@ -84,7 +85,7 @@ class EntryControllerTest {
         JSONAssert.assertEquals(expected, response.getBody(), false);
     }
 
-    @Test
+    @Test @Order(5)
     void return401() { // no/wrong login returns 401
         restTemplate.getRestTemplate().getInterceptors().clear();
         final ResponseEntity<String> response = restTemplate.exchange(
